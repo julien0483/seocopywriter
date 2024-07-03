@@ -1,6 +1,7 @@
 langchain
 langchain_community
 faiss-cpu
+langchain_anthropic
 langchain-core
 pypdf
 PyPDF2
