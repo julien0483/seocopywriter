@@ -21,6 +21,7 @@ from langchain_core.prompts import ChatPromptTemplate
 import fitz  
 st.set_page_config(page_title="Seo copywriter", layout="wide", initial_sidebar_state="expanded")
 from docx.shared import Pt
+import os
 st.markdown('<h1>SEO CONTENT WRITER</h1>', unsafe_allow_html=True)
 
 def get_checkbox_states(pdf):
@@ -41,21 +42,16 @@ def get_pdf_text(pdf):
         text += page.get_text()
     # Remove placeholders (underscores)
     text = re.sub(r'_{2,}', '', text)
-    texts.append(text)  
     #print(get_checkbox_states(pdf))
-    print(texts)
-    return texts
+    return text
 
 
-def get_pages_text(pdf_docs):
-    texts = []
-    for pdf in pdf_docs:
-        pdf_reader = PdfReader(pdf)
-        pdf_text = ""
-        for page in pdf_reader.pages:
-            pdf_text += page.extract_text()
-        texts.append(pdf_text)
-    return texts
+def get_page_text(pdf):
+    pdf_reader = PdfReader(pdf)
+    pdf_text = ""
+    for page in pdf_reader.pages:
+        pdf_text += page.extract_text()
+    return pdf_reader
 
 def create_word_doc(texts):
     doc = Document()
@@ -127,9 +123,8 @@ def main():
     st.subheader("Dynamic Structure")
 
     num_pages = st.number_input("Number of pages:", min_value=1, max_value=10, value=1, step=1)
-
-    options = ['Template 1', 'Template 2', 'Template 3']
-
+    pdf_templates_folder = 'pdf_templates'
+    options = [f for f in os.listdir(pdf_templates_folder) if f.endswith('.pdf')]
     page_details = []
 
     for i in range(num_pages):
@@ -150,9 +145,7 @@ def main():
     pdf_docs = st.file_uploader(
         "Upload le cahier des charges ", accept_multiple_files=False)
     st.subheader("Structure des pages")
-
-    structures = st.file_uploader(
-        "Upload les structures des pages (1 fichier par page)", accept_multiple_files=True)              
+      
     if st.button("process"):
         with st.spinner("Processing"):
             texts = get_pdf_text(pdf_docs)
@@ -163,10 +156,11 @@ def main():
             vectorstore = get_vectorstore(texts)
             st.session_state.vectorstore = vectorstore
             print("structures dyal zbi")
-            structures_texts=get_pages_text(structures)
-            print(structures_texts)
             output_contenu=[]
-            for structure_text in structures_texts:
+            for i in range(num_pages):
+                selected_template = page_details[i]['dropdown']
+                with open(os.path.join(pdf_templates_folder, selected_template), 'rb') as template_file:
+                    structure_text = get_pdf_text(template_file)
                 output_page=handle_userinput("Ecris SEO contenu pour la page suivant la structure suivante : " + structure_text)
                 print(output_page)
                 output_contenu.append(output_page)
