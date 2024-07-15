@@ -19,7 +19,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 import fitz  
-st.set_page_config(page_title="Analizza Preventivi", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Seo copywriter", layout="wide", initial_sidebar_state="expanded")
 from docx.shared import Pt
 st.markdown('<h1>SEO CONTENT WRITER</h1>', unsafe_allow_html=True)
 
@@ -121,7 +121,30 @@ def handle_userinput(user_question):
         return
 
 def main():
+
     load_dotenv()
+
+    st.subheader("Dynamic Structure")
+
+    num_pages = st.number_input("Number of pages:", min_value=1, max_value=10, value=1, step=1)
+
+    options = ['Template 1', 'Template 2', 'Template 3']
+
+    page_details = []
+
+    for i in range(num_pages):
+        st.write(f"### Page {i+1}")
+        text_input_1 = st.text_input(f"Titre {i+1}")
+        text_input_2 = st.text_input(f"URL Concurrent {i+1}")
+        dropdown = st.selectbox(f'Choisir le template de structure pour la page {i+1}', options)
+        
+        page_details.append({
+            "page": i+1,
+            "text_input_1": text_input_1,
+            "text_input_2": text_input_2,
+            "dropdown": dropdown
+        })
+
 
     st.subheader("Cahier des charges")
     pdf_docs = st.file_uploader(
@@ -153,12 +176,6 @@ def main():
                 data=word_buffer,
                 file_name="SEOCONTENT.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-
-
-    #user_question = st.text_input(":")
-    #if user_question:
-        #st.session_state.user_question = user_question
-        #handle_userinput(user_question)
-
+        
 if __name__ == "__main__":
     main()
