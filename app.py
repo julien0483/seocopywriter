@@ -23,7 +23,7 @@ st.set_page_config(page_title="Seo copywriter", layout="wide", initial_sidebar_s
 from docx.shared import Pt
 import os
 st.markdown('<h1>SEO CONTENT WRITER</h1>', unsafe_allow_html=True)
-
+from langchain_core.messages import HumanMessage
 def get_checkbox_states(pdf):
     checkbox_states = []
     pdf_reader = PyPDF2.PdfReader(pdf)
@@ -85,19 +85,14 @@ def get_vectorstore(texts):
     return vectorstore
 
 def handle_userinput(user_question):
-    if "vectorstore" not in st.session_state:
-        st.write("Error: Vectorstore not found. Please upload and process the PDFs first.")
-        return
-    vectorstore = st.session_state.vectorstore
     system_prompt = (
         """You are an expert in creating SEO-optimized website content. Your task is to develop content for a client's website based 
         on the detailed information provided.
          The content must be structured to enhance the website’s visibility in search engine results, 
          attract the target audience, and align with the client's business goals.
+         Note: this is not a conversation, you provide the final answer
         """
-        "\n\n"
-        "{context}"
-    )
+                )
 
     prompt = ChatPromptTemplate.from_messages(
         [
@@ -105,22 +100,19 @@ def handle_userinput(user_question):
             ("human", "{input}"),
         ]
     )
-
-    llm = ChatOpenAI(model="gpt-4")
-    
-    #llm = ChatAnthropic(model='claude-2.1')
-    retriever = vectorstore.as_retriever()
-    question_answer_chain = create_stuff_documents_chain(llm, prompt)
-    rag_chain = create_retrieval_chain(retriever, question_answer_chain)
-    response = rag_chain.invoke({"input":"""
-
-    """ + user_question})
     
 
+    llm = ChatOpenAI(model="gpt-4o") 
+    chain = prompt | llm
+    
+
+    response = chain.invoke({"input": [HumanMessage(content=user_question)]})
+
+    print("ana a9wad wahed fhad lkawkab")
     # Parse the JSON response
+    print(response)
     try:
-        response = response['answer']
-        return response
+        return response.content
 
     except json.JSONDecodeError:
         st.write("Error: Invalid JSON response")
@@ -163,14 +155,13 @@ def main():
                 st.write("No text extracted from PDFs.")
                 return
 
-            vectorstore = get_vectorstore(texts)
-            st.session_state.vectorstore = vectorstore
+
             output_contenu=[]
             for i in range(num_pages):
                 selected_template = page_details[i]['dropdown']
                 with open(os.path.join(pdf_templates_folder, selected_template), 'rb') as template_file:
                     structure_text = get_pdf_text(template_file)
-                output_page=handle_userinput("Ecris SEO contenu pour la page suivant la structure suivante : " + structure_text)
+                output_page=handle_userinput("Details du Cahier des charges  : "+texts+"Ton travail Ecris SEO contenu pour la page suivant la structure suivante : " + structure_text)
                 print(output_page)
                 output_contenu.append(output_page)
             print(output_contenu)
