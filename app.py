@@ -53,19 +53,29 @@ def get_page_text(pdf):
         pdf_text += page.extract_text()
     return pdf_reader
 
-def create_word_doc(texts):
+def create_word_doc(texts, titles):
     doc = Document()
-    for i, text in enumerate(texts):
+    
+    # Add a header with big text
+    header = doc.sections[0].header
+    header_paragraph = header.paragraphs[0]
+    run = header_paragraph.add_run("SEO Content")
+    run.font.size = Pt(24)
+    run.bold = True
+    
+    for i, (text, title_text) in enumerate(zip(texts, titles)):
         # Add a bold title before each text
         title = doc.add_paragraph()
-        run = title.add_run(f"Page {i + 1}")
+        run = title.add_run(title_text)
         run.bold = True
         run.font.size = Pt(14)
         doc.add_paragraph(text)
+    
     buffer = BytesIO()
     doc.save(buffer)
     buffer.seek(0)
     return buffer
+
 
 def get_vectorstore(texts):
     if not texts:
@@ -155,7 +165,6 @@ def main():
 
             vectorstore = get_vectorstore(texts)
             st.session_state.vectorstore = vectorstore
-            print("structures dyal zbi")
             output_contenu=[]
             for i in range(num_pages):
                 selected_template = page_details[i]['dropdown']
@@ -165,7 +174,8 @@ def main():
                 print(output_page)
                 output_contenu.append(output_page)
             print(output_contenu)
-        word_buffer = create_word_doc(output_contenu)
+        titles = [page["text_input_1"] for page in page_details]
+        word_buffer = create_word_doc(output_contenu,titles)
         st.download_button(label="Download Word Document",
                 data=word_buffer,
                 file_name="SEOCONTENT.docx",
