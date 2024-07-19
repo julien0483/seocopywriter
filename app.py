@@ -119,8 +119,7 @@ def extract_data(user_question):
     answer=response.content[0].text
     return answer
 def handle_userinput(user_question):
-    with open('prompt.txt', 'r') as file:
-        system_prompt = file.read()
+    with open(os.path.join(os.path.dirname(__file__), 'prompt.txt'), 'r') as file:        system_prompt = file.read()
         print("system wiwiw")
         print(system_prompt)
 # Create a message
@@ -174,7 +173,6 @@ def main():
             if not texts:
                 st.write("No text extracted from PDFs.")
                 return
-
 
             output_contenu=[]
             for i in range(num_pages):
