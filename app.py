@@ -119,10 +119,17 @@ def extract_data(user_question):
     answer=response.content[0].text
     return answer
 def handle_userinput(user_question):
-    with open(os.path.join(os.path.dirname(__file__), 'prompt.txt'), 'r') as file:        
-        system_prompt = file.read()
-        print("system wiwiw")
-        print(system_prompt)
+    
+    system_prompt = (
+        """
+        You are an expert in creating SEO-optimized website content. Your task is to develop content for a client's website based 
+        on the detailed information provided.
+        The content must be structured to enhance the website’s visibility in search engine results, 
+        attract the target audience, and align with the client's business goals.
+        Note: this is not a conversation, you provide the final answer
+
+        """
+                )
 # Create a message
     response = client.messages.create(
         model="claude-3-5-sonnet-20240620",
@@ -174,6 +181,7 @@ def main():
             if not texts:
                 st.write("No text extracted from PDFs.")
                 return
+
 
             output_contenu=[]
             for i in range(num_pages):
