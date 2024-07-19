@@ -12,3 +12,4 @@ altair
 tiktoken
 python-docx 
 PyMuPDF
+anthropic

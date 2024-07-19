@@ -22,8 +22,11 @@ import fitz
 st.set_page_config(page_title="Seo copywriter", layout="wide", initial_sidebar_state="expanded")
 from docx.shared import Pt
 import os
+from langchain_anthropic import AnthropicLLM
 st.markdown('<h1>SEO CONTENT WRITER</h1>', unsafe_allow_html=True)
 from langchain_core.messages import HumanMessage
+import anthropic
+
 def get_checkbox_states(pdf):
     checkbox_states = []
     pdf_reader = PyPDF2.PdfReader(pdf)
@@ -37,7 +40,18 @@ def get_pdf_text(pdf):
     texts = []
     text = ""
     pdf_document = fitz.open(stream=pdf.read(), filetype="pdf")
-    for page_num in range(2, pdf_document.page_count):  # Start from the third page (index 2)
+    for page_num in range(0, pdf_document.page_count):  # Start from the third page (index 2)
+        page = pdf_document.load_page(page_num)
+        text += page.get_text()
+    # Remove placeholders (underscores)
+    text = re.sub(r'_{2,}', '', text)
+    #print(get_checkbox_states(pdf))
+    return text
+def get_pdf_text_cahier(pdf):
+    texts = []
+    text = ""
+    pdf_document = fitz.open(stream=pdf.read(), filetype="pdf")
+    for page_num in range(2, 4):  # Start from the third page (index 2)
         page = pdf_document.load_page(page_num)
         text += page.get_text()
     # Remove placeholders (underscores)
@@ -84,39 +98,42 @@ def get_vectorstore(texts):
     vectorstore = FAISS.from_texts(texts=texts, embedding=embeddings)
     return vectorstore
 
-def handle_userinput(user_question):
+client = anthropic.Anthropic(
+    api_key="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"  # You can omit this line if you set the environment variable
+)
+def extract_data(user_question):
     system_prompt = (
-        """You are an expert in creating SEO-optimized website content. Your task is to develop content for a client's website based 
-        on the detailed information provided.
-         The content must be structured to enhance the website’s visibility in search engine results, 
-         attract the target audience, and align with the client's business goals.
-         Note: this is not a conversation, you provide the final answer
+        """
+        You extract the Data in a strctured and organized  and clear way (taking into account the language of the content provided) :
+
         """
                 )
-
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system_prompt),
-            ("human", "{input}"),
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20240620",
+        max_tokens=1024,
+        system=system_prompt,
+        messages=[
+            {"role": "user", "content": user_question}
         ]
     )
-    
-
-    llm = ChatOpenAI(model="gpt-4o") 
-    chain = prompt | llm
-    
-
-    response = chain.invoke({"input": [HumanMessage(content=user_question)]})
-
-    print("ana a9wad wahed fhad lkawkab")
-    # Parse the JSON response
-    print(response)
-    try:
-        return response.content
-
-    except json.JSONDecodeError:
-        st.write("Error: Invalid JSON response")
-        return
+    answer=response.content[0].text
+    return answer
+def handle_userinput(user_question):
+    with open('prompt.txt', 'r') as file:
+        system_prompt = file.read()
+        print("system wiwiw")
+        print(system_prompt)
+# Create a message
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20240620",
+        max_tokens=1024,
+        system=system_prompt,
+        messages=[
+            {"role": "user", "content": user_question}
+        ]
+    )
+    answer=response.content[0].text
+    return answer
 
 def main():
 
@@ -150,7 +167,10 @@ def main():
       
     if st.button("process"):
         with st.spinner("Processing"):
-            texts = get_pdf_text(pdf_docs)
+            texts = get_pdf_text_cahier(pdf_docs)
+            print("A9wad wahed f les texts abro")
+            print(texts)
+            extracted_data=extract_data("Extract alll useful data about the client information and desires "+texts )
             if not texts:
                 st.write("No text extracted from PDFs.")
                 return
@@ -161,7 +181,7 @@ def main():
                 selected_template = page_details[i]['dropdown']
                 with open(os.path.join(pdf_templates_folder, selected_template), 'rb') as template_file:
                     structure_text = get_pdf_text(template_file)
-                output_page=handle_userinput("Details du Cahier des charges  : "+texts+"Ton travail Ecris SEO contenu pour la page suivant la structure suivante : " + structure_text)
+                output_page=handle_userinput("Provided information  : "+texts+" Ecris SEO contenu pour la page suivant la structure suivante :" + structure_text)
                 print(output_page)
                 output_contenu.append(output_page)
             print(output_contenu)
