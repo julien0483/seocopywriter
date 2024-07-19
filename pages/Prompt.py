@@ -1,8 +1,11 @@
 import streamlit as st
 import os
 
-# Define the file path
-file_path = os.path.join('prompt', 'prompt.txt')
+# Get the absolute path of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define the file path relative to the current script's directory
+file_path = os.path.join(current_dir, '..', 'prompt', 'prompt.txt')
 # Function to read the file
 def read_file(file_path):
     with open(file_path, 'r') as file:
@@ -14,7 +17,10 @@ def write_file(file_path, content):
         file.write(content)
 
 # Read the current content of the file
-current_content = read_file(file_path)
+try:
+    current_content = read_file(file_path)
+except FileNotFoundError:
+    current_content = ""  # Handle case where file might not exist
 
 # Streamlit layout
 st.title("Edit Text in prompt.txt")
@@ -27,4 +33,3 @@ edited_content = st.text_area("Edit here:", current_content, height=300)
 if st.button("Save"):
     write_file(file_path, edited_content)
     st.success("File updated successfully!")
-
