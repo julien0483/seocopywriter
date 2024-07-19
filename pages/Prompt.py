@@ -2,8 +2,7 @@ import streamlit as st
 import os
 
 # Define the file path
-file_path = './prompt.txt'
-
+file_path = os.path.join('prompt', 'prompt.txt')
 # Function to read the file
 def read_file(file_path):
     with open(file_path, 'r') as file:
