@@ -27,6 +27,14 @@ st.markdown('<h1>SEO CONTENT WRITER</h1>', unsafe_allow_html=True)
 from langchain_core.messages import HumanMessage
 import anthropic
 
+file_path = os.path.join("prompt", "prompt.txt")
+
+# Check if the file exists
+if os.path.exists(file_path):
+    with open(file_path, 'r') as prompt_file:
+        prompt = prompt_file.read()
+    print(prompt)
+    
 def get_checkbox_states(pdf):
     checkbox_states = []
     pdf_reader = PyPDF2.PdfReader(pdf)
@@ -120,16 +128,10 @@ def extract_data(user_question):
     return answer
 def handle_userinput(user_question):
     
-    system_prompt = (
-        """
-        You are an expert in creating SEO-optimized website content. Your task is to develop content for a client's website based 
-        on the detailed information provided.
-        The content must be structured to enhance the website’s visibility in search engine results, 
-        attract the target audience, and align with the client's business goals.
-        Note: this is not a conversation, you provide the final answer
-
-        """
-                )
+    system_prompt = prompt
+    print("ana a9wad prompt")
+    print(prompt)
+    print("ana mora tani a9wad prompt")
 # Create a message
     response = client.messages.create(
         model="claude-3-5-sonnet-20240620",
@@ -143,6 +145,7 @@ def handle_userinput(user_question):
     return answer
 
 def main():
+
 
     load_dotenv()
 
