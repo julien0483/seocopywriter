@@ -182,7 +182,6 @@ def main():
                 st.write("No text extracted from PDFs.")
                 return
 
-
             output_contenu=[]
             for i in range(num_pages):
                 selected_template = page_details[i]['dropdown']
