@@ -28,11 +28,18 @@ from langchain_core.messages import HumanMessage
 import anthropic
 
 file_path = os.path.join("prompt", "prompt.txt")
+extracting_prompt = os.path.join("prompt", "extraction_prompt.txt")
+
 
 # Check if the file exists
 if os.path.exists(file_path):
     with open(file_path, 'r') as prompt_file:
         prompt = prompt_file.read()
+    print(prompt)
+
+if os.path.exists(file_path):
+    with open(file_path, 'r') as prompt_file:
+        extraction_prompt = prompt_file.read()
     print(prompt)
     
 def get_checkbox_states(pdf):
@@ -48,7 +55,7 @@ def get_pdf_text(pdf):
     texts = []
     text = ""
     pdf_document = fitz.open(stream=pdf.read(), filetype="pdf")
-    for page_num in range(0, pdf_document.page_count):  # Start from the third page (index 2)
+    for page_num in range(0, pdf_document.page_count):  
         page = pdf_document.load_page(page_num)
         text += page.get_text()
     # Remove placeholders (underscores)
@@ -59,7 +66,7 @@ def get_pdf_text_cahier(pdf):
     texts = []
     text = ""
     pdf_document = fitz.open(stream=pdf.read(), filetype="pdf")
-    for page_num in range(2, 4):  # Start from the third page (index 2)
+    for page_num in range(0, pdf_document.page_count):  
         page = pdf_document.load_page(page_num)
         text += page.get_text()
     # Remove placeholders (underscores)
@@ -110,12 +117,7 @@ client = anthropic.Anthropic(
     api_key="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"  # You can omit this line if you set the environment variable
 )
 def extract_data(user_question):
-    system_prompt = (
-        """
-        You extract the Data in a strctured and organized  and clear way (taking into account the language of the content provided) :
-
-        """
-                )
+    system_prompt = extraction_prompt
     response = client.messages.create(
         model="claude-3-5-sonnet-20240620",
         max_tokens=1024,
@@ -173,7 +175,9 @@ def main():
     st.subheader("Cahier des charges")
     pdf_docs = st.file_uploader(
         "Upload le cahier des charges ", accept_multiple_files=False)
-    st.subheader("Structure des pages")
+    st.subheader("Keywords")
+    keywords = st.text_input("Enter keywords")
+
       
     if st.button("process"):
         with st.spinner("Processing"):
@@ -190,7 +194,7 @@ def main():
                 selected_template = page_details[i]['dropdown']
                 with open(os.path.join(pdf_templates_folder, selected_template), 'rb') as template_file:
                     structure_text = get_pdf_text(template_file)
-                output_page=handle_userinput("Provided information  : "+texts+" Ecris SEO contenu pour la page suivant la structure suivante :" + structure_text)
+                output_page=handle_userinput("Provided information  : "+texts+" Write SEO content following the structure \n STRUCTURE : " + structure_text + "taking into account following keywords : "+ keywords)
                 print(output_page)
                 output_contenu.append(output_page)
             print(output_contenu)
