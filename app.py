@@ -22,18 +22,15 @@ from dotenv import load_dotenv
 file_path = os.path.join("prompt", "prompt.txt")
 extracting_prompt = os.path.join("prompt", "extraction_prompt.txt")
 api_key= os.getenv("ANTHROPIC_API_KEY")
-print("tani a9wad api")
-print(api_key)
+
 # Check if the file exists
 if os.path.exists(file_path):
     with open(file_path, 'r') as prompt_file:
         prompt = prompt_file.read()
-    print(prompt)
 
 if os.path.exists(file_path):
     with open(file_path, 'r') as prompt_file:
         extraction_prompt = prompt_file.read()
-    print(prompt)
     
 def get_checkbox_states(pdf):
     checkbox_states = []
@@ -105,14 +102,15 @@ def get_vectorstore(texts):
     embeddings = OpenAIEmbeddings()
     vectorstore = FAISS.from_texts(texts=texts, embedding=embeddings)
     return vectorstore
-
 client = anthropic.Anthropic(
     api_key=api_key
 )
 def extract_data(user_question):
+    
     system_prompt = extraction_prompt
     response = client.messages.create(
         model="claude-3-5-sonnet-20240620",
+        max_tokens=4096,
         system=system_prompt,
         messages=[
             {"role": "user", "content": user_question}
@@ -123,12 +121,12 @@ def extract_data(user_question):
 def handle_userinput(user_question):
     
     system_prompt = prompt
-    print("ana a9wad prompt")
-    print(prompt)
-    print("ana mora tani a9wad prompt")
+
 # Create a message
+
     response = client.messages.create(
         model="claude-3-5-sonnet-20240620",
+        max_tokens=4096,
         system=system_prompt,
         messages=[
             {"role": "user", "content": user_question}
@@ -173,8 +171,7 @@ def main():
     if st.button("process"):
         with st.spinner("Processing"):
             texts = get_pdf_text_cahier(pdf_docs)
-            print("A9wad wahed f les texts abro")
-            print(texts)
+
             extracted_data=extract_data("Extract alll useful data about the client information and desires "+texts )
             if not texts:
                 st.write("No text extracted from PDFs.")
@@ -186,9 +183,7 @@ def main():
                 with open(os.path.join(pdf_templates_folder, selected_template), 'rb') as template_file:
                     structure_text = get_pdf_text(template_file)
                 output_page=handle_userinput("Provided information  : "+texts+" Write SEO content following the structure \n STRUCTURE : " + structure_text + "taking into account following keywords : "+ keywords)
-                print(output_page)
                 output_contenu.append(output_page)
-            print(output_contenu)
         titles = [page["text_input_1"] for page in page_details]
         word_buffer = create_word_doc(output_contenu,titles)
         st.download_button(label="Download Word Document",
