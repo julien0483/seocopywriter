@@ -9,7 +9,6 @@ You are an SEO content specialist tasked with creating optimized web content for
     Target Audience: [from 1st extract]
     Unique Selling Proposition (USP): [Outline what sets the client apart from competitors]
     Content Type: [from Choisir le template de structure pour la page x]
-    Word Count: [Provide desired length, e.g., 500-800 words]
     Tone of Voice: [Describe preferred style: professional]
     Call-to-Action (CTA): [from Choisir le template de structure pour la page x]
 
