@@ -7,30 +7,23 @@ from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
-from langchain_core.prompts import PromptTemplate
-import altair as alt
-from langchain_anthropic import ChatAnthropic
 from docx import Document#exceptions
 from io import BytesIO
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate
 import fitz  
 st.set_page_config(page_title="Seo copywriter", layout="wide", initial_sidebar_state="expanded")
 from docx.shared import Pt
 import os
-from langchain_anthropic import AnthropicLLM
 st.markdown('<h1>SEO CONTENT WRITER</h1>', unsafe_allow_html=True)
 from langchain_core.messages import HumanMessage
 import anthropic
+from dotenv import load_dotenv
+
 
 file_path = os.path.join("prompt", "prompt.txt")
 extracting_prompt = os.path.join("prompt", "extraction_prompt.txt")
-
-
+api_key= os.getenv("ANTHROPIC_API_KEY")
+print("tani a9wad api")
+print(api_key)
 # Check if the file exists
 if os.path.exists(file_path):
     with open(file_path, 'r') as prompt_file:
@@ -114,7 +107,7 @@ def get_vectorstore(texts):
     return vectorstore
 
 client = anthropic.Anthropic(
-    api_key="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"  # You can omit this line if you set the environment variable
+    api_key=api_key
 )
 def extract_data(user_question):
     system_prompt = extraction_prompt

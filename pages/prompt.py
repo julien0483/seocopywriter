@@ -1,6 +1,6 @@
 import os
 import streamlit as st
-
+from dotenv import load_dotenv
 # Set the path to the text file
 file_path = os.path.join("prompt", "prompt.txt")
 
@@ -21,11 +21,13 @@ if os.path.exists(file_path):
         extraction_prompt_text = prompt_file.read()
 else:
     extraction_prompt_text = ""
-
+load_dotenv()
 # Display the text area for editing the content
 st.title("Writing Prompt")
 edited_text = st.text_area("Edit the content of prompt.txt", prompt_text, height=300)
-
+api_key= os.getenv("ANTHROPIC_API_KEY")
+print("a9wad api")
+print(api_key)
 # Add a button to save the changes
 if st.button("Save prompt changes"):
     with open(file_path, 'w') as prompt_file:
