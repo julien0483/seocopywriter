@@ -113,7 +113,6 @@ def extract_data(user_question):
     system_prompt = extraction_prompt
     response = client.messages.create(
         model="claude-3-5-sonnet-20240620",
-        max_tokens=1024,
         system=system_prompt,
         messages=[
             {"role": "user", "content": user_question}
@@ -130,7 +129,6 @@ def handle_userinput(user_question):
 # Create a message
     response = client.messages.create(
         model="claude-3-5-sonnet-20240620",
-        max_tokens=1024,
         system=system_prompt,
         messages=[
             {"role": "user", "content": user_question}
